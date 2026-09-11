@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numbered Heads Together — Maths</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#1a2540;color:#fff;min-height:100vh;display:flex;flex-direction:column;user-select:none}
+  header{background:#2E4471;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #3d5a8a}
+  header h1{font-size:1.15rem;font-weight:600;letter-spacing:.02em;color:#e8edf7}
+  header span{font-size:.85rem;color:#8aa0c8;font-weight:500}
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;gap:24px}
+
+  /* Question card */
+  .q-card{background:#243057;border:1.5px solid #3d5a8a;border-radius:16px;padding:36px 44px;max-width:760px;width:100%;text-align:center;position:relative}
+  .q-label{font-size:.75rem;font-weight:600;letter-spacing:.12em;color:#6b87b8;text-transform:uppercase;margin-bottom:14px}
+  .q-text{font-size:1.7rem;font-weight:600;line-height:1.45;color:#e8edf7;min-height:3.5rem}
+  .q-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:22px}
+  .q-nav button{background:#2E4471;border:1.5px solid #4a6494;color:#c4d2ea;border-radius:8px;padding:8px 20px;font-size:.85rem;font-weight:500;cursor:pointer;transition:background .15s}
+  .q-nav button:hover{background:#3a5280}
+  .q-counter{font-size:.85rem;color:#6b87b8;min-width:60px;text-align:center}
+  .edit-btn{position:absolute;top:14px;right:16px;background:none;border:none;color:#6b87b8;cursor:pointer;font-size:.8rem;padding:4px 8px;border-radius:6px;transition:color .15s}
+  .edit-btn:hover{color:#a0b8d8}
+
+  /* Timer */
+  .timer-ring{position:relative;width:130px;height:130px;flex-shrink:0}
+  .timer-ring svg{transform:rotate(-90deg)}
+  .timer-ring circle{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
+  .timer-ring .bg{stroke:#2E4471}
+  .timer-ring .fg{stroke:#1A7A4A}
+  #timer-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2.2rem;font-weight:700;color:#e8edf7;line-height:1}
+  #timer-label small{font-size:.65rem;font-weight:500;color:#6b87b8;letter-spacing:.08em;margin-top:4px}
+
+  .timer-row{display:flex;align-items:center;gap:28px}
+  .timer-controls{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+  .timer-controls label{font-size:.75rem;color:#6b87b8;font-weight:500}
+  .timer-controls select{background:#243057;border:1.5px solid #3d5a8a;color:#c4d2ea;border-radius:7px;padding:5px 10px;font-size:.85rem;cursor:pointer}
+  .btn-start{background:#1A7A4A;border:none;color:#fff;border-radius:9px;padding:11px 28px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.01em}
+  .btn-start:hover{background:#158040}
+  .btn-start:active{transform:scale(.97)}
+  .btn-start.paused{background:#c07c00}
+  .btn-start.paused:hover{background:#a96b00}
+  .btn-reset{background:none;border:1.5px solid #3d5a8a;color:#8aa0c8;border-radius:9px;padding:11px 18px;font-size:.9rem;cursor:pointer;transition:background .15s}
+  .btn-reset:hover{background:#2E4471}
+
+  /* Number caller */
+  .caller-section{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .heads{display:flex;gap:18px}
+  .head{width:72px;height:72px;border-radius:50%;background:#243057;border:2.5px solid #3d5a8a;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#6b87b8;transition:all .25s;cursor:default}
+  .head.active{border-color:#f5c842;color:#f5c842;background:#2a3520;border-color:#1A7A4A;color:#fff;background:#1A7A4A;transform:scale(1.18);box-shadow:0 0 22px #1A7A4A55}
+  .head.called{animation:pulse .5s ease-in-out 3}
+  @keyframes pulse{0%,100%{transform:scale(1.18)}50%{transform:scale(1.28)}}
+  .btn-call{background:#2E4471;border:2px solid #4a6494;color:#c4d2ea;border-radius:12px;padding:13px 34px;font-size:1.05rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.01em}
+  .btn-call:hover{background:#3a5280}
+  .btn-call:active{transform:scale(.97)}
+  .caller-label{font-size:.75rem;color:#6b87b8;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+
+  /* Divider */
+  .divider{width:100%;max-width:760px;border:none;border-top:1px solid #2E4471}
+
+  /* Modal for question edit */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+  .modal-bg.open{display:flex}
+  .modal{background:#243057;border:1.5px solid #3d5a8a;border-radius:16px;padding:28px 32px;width:min(560px,94vw);display:flex;flex-direction:column;gap:16px}
+  .modal h2{font-size:1rem;font-weight:600;color:#e8edf7}
+  .modal textarea{background:#1a2540;border:1.5px solid #3d5a8a;color:#e8edf7;border-radius:8px;padding:12px;font-family:'Inter',sans-serif;font-size:.9rem;line-height:1.6;resize:vertical;min-height:220px;width:100%}
+  .modal-hint{font-size:.75rem;color:#6b87b8}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end}
+  .modal-actions button{border-radius:8px;padding:9px 22px;font-size:.9rem;font-weight:500;cursor:pointer}
+  .btn-cancel{background:none;border:1.5px solid #3d5a8a;color:#8aa0c8}
+  .btn-cancel:hover{background:#2E4471}
+  .btn-save{background:#1A7A4A;border:none;color:#fff}
+  .btn-save:hover{background:#158040}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧠 Numbered Heads Together</h1>
+  <span id="class-label">Year 7 Maths</span>
+</header>
+
+<div class="main">
+
+  <!-- Question -->
+  <div class="q-card">
+    <button class="edit-btn" onclick="openEdit()">✏ Edit questions</button>
+    <div class="q-label">Question</div>
+    <div class="q-text" id="q-text">Loading…</div>
+    <div class="q-nav">
+      <button onclick="prevQ()">← Prev</button>
+      <span class="q-counter" id="q-counter">1 / 15</span>
+      <button onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Timer + Caller row -->
+  <div class="timer-row">
+    <div class="timer-ring">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <circle class="bg" cx="65" cy="65" r="55"/>
+        <circle class="fg" id="timer-arc" cx="65" cy="65" r="55"
+          stroke-dasharray="345.4"
+          stroke-dashoffset="0"/>
+      </svg>
+      <div id="timer-label"><span id="t-display">60</span><small>SECONDS</small></div>
+    </div>
+
+    <div class="timer-controls">
+      <label>Duration</label>
+      <select id="dur-sel" onchange="resetTimer()">
+        <option value="30">30 s</option>
+        <option value="60" selected>60 s</option>
+        <option value="90">90 s</option>
+        <option value="120">2 min</option>
+        <option value="180">3 min</option>
+      </select>
+      <button class="btn-start" id="btn-start" onclick="toggleTimer()">▶ Start</button>
+      <button class="btn-reset" onclick="resetTimer()">↺ Reset</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Number caller -->
+  <div class="caller-section">
+    <div class="caller-label">Who answers?</div>
+    <div class="heads" id="heads-row">
+      <div class="head" id="h1">1</div>
+      <div class="head" id="h2">2</div>
+      <div class="head" id="h3">3</div>
+      <div class="head" id="h4">4</div>
+    </div>
+    <button class="btn-call" onclick="callNumber()">🎲 Pick a student</button>
+  </div>
+
+</div>
+
+<!-- Edit modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2>Edit questions</h2>
+    <div class="modal-hint">One question per line.</div>
+    <textarea id="q-editor"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_QUESTIONS = [
+  "What is the next term in the sequence: 3, 7, 11, 15, ___?",
+  "Calculate:  2 + 3 × 4",
+  "What is  ¾ + ⅛?",
+  "Simplify:  4a + 3b + 2a − b",
+  "What is 15% of 200?",
+  "Find the area of a rectangle 6 cm × 9 cm.",
+  "Work out:  −3 × −4",
+  "Round 3.756 to 1 decimal place.",
+  "Solve:  2x + 5 = 13",
+  "What is the HCF of 12 and 18?",
+  "What are the next two terms:  1, 4, 9, 16, ___, ___?",
+  "Write 0.6 as a fraction in its simplest form.",
+  "Find the mean of:  3, 7, 5, 9, 6.",
+  "Work out:  −8 + 3",
+  "Find the perimeter of a square with side 7 cm.",
+];
+
+let questions = [...DEFAULT_QUESTIONS];
+let qi = 0;
+const CIRC = 2 * Math.PI * 55;
+
+function showQ(){
+  document.getElementById('q-text').textContent = questions[qi];
+  document.getElementById('q-counter').textContent = `${qi+1} / ${questions.length}`;
+}
+function nextQ(){ qi=(qi+1)%questions.length; showQ(); }
+function prevQ(){ qi=(qi-1+questions.length)%questions.length; showQ(); }
+
+// Timer
+let duration = 60, remaining = 60, interval = null, running = false;
+const arc = document.getElementById('timer-arc');
+const display = document.getElementById('t-display');
+const startBtn = document.getElementById('btn-start');
+
+function setArc(r){
+  const offset = CIRC * (1 - r/duration);
+  arc.style.strokeDashoffset = offset;
+  arc.style.stroke = r > duration*0.33 ? '#1A7A4A' : r > duration*0.1 ? '#c07c00' : '#b03030';
+}
+function updateDisplay(){
+  const m = Math.floor(remaining/60);
+  const s = remaining % 60;
+  display.textContent = m > 0 ? `${m}:${String(s).padStart(2,'0')}` : remaining;
+  document.getElementById('t-display').parentElement.querySelector('small').textContent =
+    m > 0 ? 'MINS' : 'SECONDS';
+  setArc(remaining);
+}
+function toggleTimer(){
+  if(running){ clearInterval(interval); running=false; startBtn.textContent='▶ Resume'; startBtn.classList.add('paused'); }
+  else{
+    if(remaining<=0) resetTimer();
+    running=true; startBtn.textContent='⏸ Pause'; startBtn.classList.remove('paused');
+    interval=setInterval(()=>{
+      remaining--;
+      updateDisplay();
+      if(remaining<=0){ clearInterval(interval); running=false; startBtn.textContent='▶ Start'; startBtn.classList.remove('paused'); }
+    },1000);
+  }
+}
+function resetTimer(){
+  clearInterval(interval); running=false;
+  duration = parseInt(document.getElementById('dur-sel').value);
+  remaining = duration;
+  updateDisplay();
+  startBtn.textContent='▶ Start'; startBtn.classList.remove('paused');
+}
+
+// Number caller
+let lastCalled = -1;
+function callNumber(){
+  const heads = document.querySelectorAll('.head');
+  heads.forEach(h=>{ h.classList.remove('active','called'); });
+  let n;
+  do{ n = Math.floor(Math.random()*4); } while(n===lastCalled && questions.length>1);
+  lastCalled = n;
+  const el = document.getElementById('h'+(n+1));
+
+  let flashes = 0, total = 16;
+  let cur = n;
+  const spin = setInterval(()=>{
+    heads.forEach(h=>h.classList.remove('active'));
+    document.getElementById('h'+(cur%4+1)).classList.add('active');
+    cur++;
+    flashes++;
+    if(flashes>=total){
+      clearInterval(spin);
+      heads.forEach(h=>h.classList.remove('active'));
+      el.classList.add('active','called');
+    }
+  }, flashes < 8 ? 80 : 140);
+}
+
+// Edit modal
+function openEdit(){
+  document.getElementById('q-editor').value = questions.join('\n');
+  document.getElementById('modal').classList.add('open');
+}
+function closeEdit(){ document.getElementById('modal').classList.remove('open'); }
+function saveEdit(){
+  const lines = document.getElementById('q-editor').value
+    .split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+  if(lines.length===0) return;
+  questions = lines;
+  qi = Math.min(qi, questions.length-1);
+  showQ();
+  closeEdit();
+}
+
+// Init
+showQ();
+updateDisplay();
+arc.style.strokeDasharray = CIRC;
+</script>
+</body>
+</html>
