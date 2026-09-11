@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numbered Heads – Year 7</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0d1b4e;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 60px;
+    gap: 18px;
+  }
+
+  h1 { font-size: 1.5rem; color: #ffd700; letter-spacing: 2px; text-align: center; }
+  .sub { font-size: 0.75rem; color: #7788bb; letter-spacing: 1px; text-align: center; }
+
+  /* ── Section label ── */
+  .section-label {
+    width: 100%; max-width: 640px;
+    font-size: 0.68rem; color: #7788bb; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: -8px;
+  }
+
+  /* ── Scores ── */
+  .scores { display: flex; gap: 10px; width: 100%; max-width: 640px; }
+  .score {
+    flex: 1; text-align: center; padding: 12px 6px;
+    border-radius: 12px; border: 1px solid;
+  }
+  .score-lbl { font-size: 0.6rem; letter-spacing: 1px; opacity: .7; margin-bottom: 2px; }
+  .score-val { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+  .score-btn { background: none; border: none; cursor: pointer; font-size: 1rem; margin-top: 2px; }
+  .sc1 { border-color: #ff6b6b55; color: #ff6b6b; }
+  .sc2 { border-color: #ffd70055; color: #ffd700; }
+  .sc3 { border-color: #7fffb255; color: #7fffb2; }
+  .sc4 { border-color: #a29bfe55; color: #a29bfe; }
+
+  /* ── Card ── */
+  .card {
+    width: 100%; max-width: 640px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 18px; padding: 24px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .q-meta { font-size: 0.68rem; color: #7788bb; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase; }
+  .q-text { font-size: 1.35rem; line-height: 1.6; color: #eef2ff; min-height: 56px; }
+
+  .answer-box {
+    margin-top: 14px; background: rgba(127,255,178,0.1);
+    border-left: 3px solid #7fffb2; border-radius: 8px;
+    padding: 12px 16px; display: none;
+  }
+  .answer-box.show { display: block; }
+  .answer-lbl { font-size: 0.62rem; color: #7fffb2; letter-spacing: 2px; font-weight: 700; margin-bottom: 3px; }
+  .answer-txt { font-size: 1rem; color: #c8fff0; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 16px; }
+  .btn {
+    flex: 1; padding: 11px; border: none; border-radius: 10px;
+    font-size: 0.88rem; font-weight: 700; cursor: pointer;
+  }
+  .btn:disabled { opacity: .3; cursor: default; }
+  .btn-reveal { background: #7fffb2; color: #0d1b4e; }
+  .btn-next   { background: #ffd700; color: #0d1b4e; }
+
+  /* ── Custom question form ── */
+  .custom-form {
+    width: 100%; max-width: 640px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 14px; padding: 18px 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .custom-form input, .custom-form textarea {
+    width: 100%; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+    color: #fff; font-size: 0.95rem; padding: 10px 14px;
+    font-family: inherit; outline: none; resize: none;
+  }
+  .custom-form input::placeholder, .custom-form textarea::placeholder { color: #6677aa; }
+  .custom-form input:focus, .custom-form textarea:focus { border-color: #ffd700; }
+  .custom-form button {
+    align-self: flex-end; padding: 10px 22px;
+    background: #6c6fff; color: #fff; border: none;
+    border-radius: 9px; font-size: 0.88rem; font-weight: 700; cursor: pointer;
+  }
+  .custom-form button:hover { filter: brightness(1.15); }
+  .custom-pill { font-size: 0.72rem; color: #a29bfe; margin-top: -4px; }
+
+  /* ── Bottom grid ── */
+  .bottom { display: flex; gap: 12px; width: 100%; max-width: 640px; }
+  .panel {
+    flex: 1; background: rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .panel-title { font-size: 0.68rem; color: #7788bb; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; }
+
+  /* Seats */
+  .seats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .seat {
+    border-radius: 10px; padding: 12px 6px; text-align: center;
+    cursor: pointer; border: 2px solid; font-weight: 900;
+    transition: transform .12s;
+  }
+  .seat:hover { transform: scale(1.06); }
+  .seat .num { font-size: 1.6rem; }
+  .seat-1 { border-color: #ff6b6b; color: #ff6b6b; }
+  .seat-2 { border-color: #ffd700; color: #ffd700; }
+  .seat-3 { border-color: #7fffb2; color: #7fffb2; }
+  .seat-4 { border-color: #a29bfe; color: #a29bfe; }
+  .seat.chosen.seat-1 { background: #ff6b6b; color: #fff; }
+  .seat.chosen.seat-2 { background: #ffd700; color: #0d1b4e; }
+  .seat.chosen.seat-3 { background: #7fffb2; color: #0d1b4e; }
+  .seat.chosen.seat-4 { background: #a29bfe; color: #fff; }
+
+  .spin-btn {
+    width: 100%; margin-top: 10px; padding: 9px;
+    background: #6c6fff; color: #fff; border: none;
+    border-radius: 9px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  }
+  .spin-btn:hover { filter: brightness(1.15); }
+  .chosen-lbl { text-align: center; margin-top: 8px; font-size: 0.82rem; color: #ffd700; min-height: 18px; }
+
+  /* Timer */
+  .timer-display {
+    font-size: 2.6rem; font-weight: 900; color: #ffd700;
+    text-align: center; letter-spacing: 3px; margin: 4px 0 12px;
+  }
+  .timer-display.warn { color: #ff6b6b; animation: blink .5s infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+  .t-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .t-btn {
+    flex: 1; padding: 8px 4px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.18); background: transparent;
+    color: #fff; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  }
+  .t-btn:hover { background: rgba(255,255,255,0.1); }
+  .t-btn.go { background: #7fffb2; color: #0d1b4e; border-color: #7fffb2; }
+
+  /* ── Built-in topics ── */
+  .topics { display: flex; flex-wrap: wrap; gap: 7px; width: 100%; max-width: 640px; }
+  .topic-btn {
+    padding: 6px 14px; border-radius: 18px;
+    border: 1.5px solid #ffd700; background: transparent;
+    color: #ffd700; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all .15s;
+  }
+  .topic-btn.active, .topic-btn:hover { background: #ffd700; color: #0d1b4e; }
+
+  .custom-timer-row {
+    display: flex; gap: 6px; margin-top: 6px;
+  }
+  .custom-timer-row input {
+    flex: 1; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 8px;
+    color: #fff; font-size: 0.82rem; padding: 7px 10px;
+    outline: none; font-family: inherit;
+  }
+  .custom-timer-row input::placeholder { color: #6677aa; font-size: 0.75rem; }
+  .custom-timer-row input:focus { border-color: #ffd700; }
+  .custom-timer-row button {
+    padding: 7px 14px; background: #ffd700; color: #0d1b4e;
+    border: none; border-radius: 8px; font-size: 0.8rem;
+    font-weight: 700; cursor: pointer;
+  }
+  .custom-timer-row button:hover { filter: brightness(1.1); }
+
+  @media (max-width: 500px) { .bottom { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<h1>🔢 Numbered Heads Together</h1>
+<p class="sub">YEAR 7 MATHS · GROUPS OF 4</p>
+
+
+<!-- Topics -->
+<div class="section-label">Built-in topics</div>
+<div class="topics" id="topicBar"></div>
+
+<!-- Question card -->
+<div class="card">
+  <div class="q-meta" id="qNum">Pick a topic or add your own question below</div>
+  <div class="q-text" id="qText">💡 Discuss as a group so everyone knows the answer!</div>
+  <div class="answer-box" id="answerBox">
+    <div class="answer-lbl">✔ ANSWER</div>
+    <div class="answer-txt" id="answerText"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-reveal" id="btnReveal" onclick="revealAnswer()" disabled>Reveal Answer</button>
+    <button class="btn btn-next"   id="btnNext"   onclick="nextQuestion()" disabled>Next ▶</button>
+  </div>
+</div>
+
+<!-- Custom question -->
+<div class="section-label">Your own question</div>
+<div class="custom-form">
+  <input  id="customQ" placeholder="Type your question here…" />
+  <input  id="customA" placeholder="Answer (optional)" />
+  <button onclick="useCustomQ()">Use this question ▶</button>
+  <div class="custom-pill" id="customPill"></div>
+</div>
+
+<!-- Spinner + Timer -->
+<div class="bottom">
+  <div class="panel">
+    <div class="panel-title">🎲 Who Answers?</div>
+    <div class="seats">
+      <div class="seat seat-1" id="seat1" onclick="pickSeat(1)"><div class="num">1</div></div>
+      <div class="seat seat-2" id="seat2" onclick="pickSeat(2)"><div class="num">2</div></div>
+      <div class="seat seat-3" id="seat3" onclick="pickSeat(3)"><div class="num">3</div></div>
+      <div class="seat seat-4" id="seat4" onclick="pickSeat(4)"><div class="num">4</div></div>
+    </div>
+    <button class="spin-btn" onclick="spinRandom()">🎲 Random Pick!</button>
+    <div class="chosen-lbl" id="chosenLbl"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">⏱ Timer</div>
+    <div class="timer-display" id="timerDisplay">1:00</div>
+    <div class="t-row">
+      <button class="t-btn go" onclick="startTimer()">▶ Start</button>
+      <button class="t-btn"    onclick="resetTimer()">↺ Reset</button>
+    </div>
+    <div class="t-row">
+      <button class="t-btn" onclick="setTimer(30)">30 s</button>
+      <button class="t-btn" onclick="setTimer(60)">1 min</button>
+      <button class="t-btn" onclick="setTimer(90)">1:30</button>
+    </div>
+    <div class="t-row">
+      <button class="t-btn" onclick="setTimer(120)">2 min</button>
+      <button class="t-btn" onclick="setTimer(180)">3 min</button>
+      <button class="t-btn" onclick="setTimer(300)">5 min</button>
+    </div>
+    <div class="custom-timer-row">
+      <input id="customTimerInput" type="number" min="1" max="60" placeholder="Custom (min)" />
+      <button onclick="setCustomTimer()">Set</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = {
+  "Place Value": [
+    { q: "What is the value of the digit 7 in 3,752?", a: "700" },
+    { q: "Write 4,060 in words.", a: "Four thousand and sixty" },
+    { q: "Round 3,847 to the nearest hundred.", a: "3,800" },
+    { q: "Order from smallest to largest: 0.5, 0.05, 5, 0.55", a: "0.05, 0.5, 0.55, 5" },
+    { q: "Which is larger: −2 or −7?", a: "−2 (closer to zero)" },
+    { q: "Write 0.75 as a fraction in its simplest form.", a: "3/4" },
+    { q: "What is −3 + −5?", a: "−8" },
+  ],
+  "Fractions & %": [
+    { q: "Find 1/3 of 60.", a: "20" },
+    { q: "Find 25% of 80.", a: "20" },
+    { q: "What is 1/2 + 1/4?", a: "3/4" },
+    { q: "Convert 3/5 to a percentage.", a: "60%" },
+    { q: "Which is bigger: 2/3 or 3/5?", a: "2/3 (= 10/15 vs 9/15)" },
+    { q: "A pizza is cut into 8 slices. Tom eats 3. What fraction is left?", a: "5/8" },
+    { q: "Find 10% of 350.", a: "35" },
+  ],
+  "Algebra": [
+    { q: "If n = 4, find: 3n + 2", a: "14" },
+    { q: "Simplify: 4a + 3b − a + 2b", a: "3a + 5b" },
+    { q: "Solve: x + 7 = 15", a: "x = 8" },
+    { q: "Write an expression for 'five more than twice n'.", a: "2n + 5" },
+    { q: "Solve: 2x = 18", a: "x = 9" },
+    { q: "Expand: 3(x + 4)", a: "3x + 12" },
+    { q: "nth term of: 3, 5, 7, 9, …?", a: "2n + 1" },
+  ],
+  "Geometry": [
+    { q: "Angles on a straight line add up to…?", a: "180°" },
+    { q: "A triangle has angles 65° and 80°. Find the third.", a: "35°" },
+    { q: "Perimeter of a rectangle 8 cm × 5 cm?", a: "26 cm" },
+    { q: "Lines of symmetry in a regular hexagon?", a: "6" },
+    { q: "What type of angle is 135°?", a: "Obtuse" },
+    { q: "Area of a rectangle 9 cm × 4 cm?", a: "36 cm²" },
+    { q: "Sum of angles in a quadrilateral?", a: "360°" },
+  ],
+  "Statistics": [
+    { q: "Mean of: 5, 8, 3, 10, 4?", a: "6" },
+    { q: "Median of: 2, 7, 4, 9, 1?", a: "4" },
+    { q: "Bag: 2 red, 3 blue. P(red) = ?", a: "2/5" },
+    { q: "Range of: 12, 7, 19, 3, 15?", a: "16" },
+    { q: "Mode of: 4, 7, 4, 9, 4, 7, 2?", a: "4" },
+    { q: "Spinner 1–4. P(even) = ?", a: "1/2" },
+  ],
+  "Ratio": [
+    { q: "Simplify 12 : 8.", a: "3 : 2" },
+    { q: "Share £30 in ratio 2 : 3.", a: "£12 and £18" },
+    { q: "5 pens cost £2.50. Cost of 8 pens?", a: "£4.00" },
+    { q: "Simplify 3 : 9.", a: "1 : 3" },
+    { q: "200g flour for 4 people. How much for 10?", a: "500g" },
+  ],
+};
+
+let topic=null, shuffled=[], idx=0, customMode=false;
+let timerSecs=60, timerDefault=60, timerInt=null, timerOn=false;
+let scores=[0,0,0,0];
+
+// Build topic buttons
+const bar = document.getElementById('topicBar');
+Object.keys(QUESTIONS).forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'topic-btn'; b.textContent = t;
+  b.onclick = () => {
+    document.querySelectorAll('.topic-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    topic = t; customMode = false;
+    shuffled = [...QUESTIONS[t]].sort(()=>Math.random()-.5);
+    idx = 0;
+    showQ();
+    document.getElementById('btnReveal').disabled = false;
+    document.getElementById('btnNext').disabled = false;
+    document.getElementById('customPill').textContent = '';
+  };
+  bar.appendChild(b);
+});
+
+function showQ() {
+  const q = shuffled[idx];
+  document.getElementById('qNum').textContent = customMode
+    ? 'Custom question'
+    : `Question ${idx+1} of ${shuffled.length}  ·  ${topic}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('answerBox').classList.remove('show');
+  document.getElementById('answerText').textContent = '';
+  clearChosen(); resetTimer();
+}
+
+function revealAnswer() {
+  const txt = shuffled[idx].a;
+  if (!txt) return;
+  document.getElementById('answerText').textContent = txt;
+  document.getElementById('answerBox').classList.add('show');
+}
+
+function nextQuestion() {
+  if (customMode) return;
+  idx = (idx+1) % shuffled.length;
+  if (idx===0) shuffled=[...QUESTIONS[topic]].sort(()=>Math.random()-.5);
+  showQ();
+}
+
+// Custom question
+function useCustomQ() {
+  const q = document.getElementById('customQ').value.trim();
+  const a = document.getElementById('customA').value.trim();
+  if (!q) return;
+  customMode = true;
+  topic = null;
+  document.querySelectorAll('.topic-btn').forEach(x=>x.classList.remove('active'));
+  shuffled = [{ q, a: a || '(no answer provided)' }];
+  idx = 0;
+  showQ();
+  document.getElementById('btnReveal').disabled = !a;
+  document.getElementById('btnNext').disabled = true;
+  document.getElementById('customPill').textContent = '✔ Loaded!';
+  document.getElementById('customQ').value = '';
+  document.getElementById('customA').value = '';
+}
+// Allow Enter to submit custom question
+document.getElementById('customQ').addEventListener('keydown', e => { if(e.key==='Enter') useCustomQ(); });
+document.getElementById('customA').addEventListener('keydown', e => { if(e.key==='Enter') useCustomQ(); });
+
+// Seats / spinner
+function clearChosen() {
+  [1,2,3,4].forEach(n=>document.getElementById('seat'+n).classList.remove('chosen'));
+  document.getElementById('chosenLbl').textContent='';
+}
+const MSGS=['','🔴 Student 1!','🟡 Student 2!','🟢 Student 3!','🟣 Student 4!'];
+function pickSeat(n) {
+  clearChosen();
+  document.getElementById('seat'+n).classList.add('chosen');
+  document.getElementById('chosenLbl').textContent=MSGS[n];
+}
+function spinRandom() {
+  let f=0, total=10+Math.floor(Math.random()*6);
+  clearChosen();
+  const iv=setInterval(()=>{
+    [1,2,3,4].forEach(x=>document.getElementById('seat'+x).classList.remove('chosen'));
+    document.getElementById('seat'+(f%4+1)).classList.add('chosen');
+    f++;
+    if(f>=total){ clearInterval(iv); pickSeat(Math.floor(Math.random()*4)+1); }
+  },80);
+}
+
+// Scores
+function addScore(n){ scores[n-1]++; document.getElementById('s'+n).textContent=scores[n-1]; }
+
+// Timer
+function setTimer(s){ timerDefault=s; resetTimer(); }
+function setCustomTimer(){
+  const val = parseInt(document.getElementById('customTimerInput').value);
+  if (!val || val < 1) return;
+  setTimer(val * 60);
+  document.getElementById('customTimerInput').value = '';
+}
+function resetTimer(){
+  clearInterval(timerInt); timerOn=false; timerSecs=timerDefault;
+  const el=document.getElementById('timerDisplay');
+  el.classList.remove('warn');
+  updateDisplay();
+}
+function startTimer(){
+  if(timerOn)return; timerOn=true;
+  timerInt=setInterval(()=>{
+    timerSecs--; updateDisplay();
+    const el=document.getElementById('timerDisplay');
+    if(timerSecs<=10) el.classList.add('warn'); else el.classList.remove('warn');
+    if(timerSecs<=0){ clearInterval(timerInt); timerOn=false; el.textContent='⏰ Time!'; }
+  },1000);
+}
+function updateDisplay(){
+  const m=Math.floor(timerSecs/60), s=timerSecs%60;
+  document.getElementById('timerDisplay').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+}
+</script>
+</body>
+</html>
